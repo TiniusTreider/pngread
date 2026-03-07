@@ -1,5 +1,5 @@
 #include "colors.h"
-#include "read.h"
+#include "parser.h"
 #include "util.h"
 
 #include <stddef.h>
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     if (path == NULL) throw_error("Failed to allocate memory");
     strcpy(path, argv[1]);
 
-    if (pass(path) != 0) throw_error("PNG parsing failed");
+    if (parse(path) != 0) throw_error("PNG parsing failed");
 
     free(path);
     return 0;

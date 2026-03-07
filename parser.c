@@ -1,6 +1,7 @@
 #include "colors.h"
+#include "error.h"
+#include "io.h"
 #include "parser.h"
-#include "util.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -30,10 +31,12 @@ static inline size_t count_chunks(void *data, size_t data_length) {
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
     while (pointer < end_pointer) {
+        const uint32_t length = read_big_endian_uint32(pointer, 0);
+
         chunk++;
 
-        const uint32_t length = read_big_endian_uint32(pointer, 0);
-        if (pointer - (uint8_t*)data > data_length - length - 12) throw_error("Invalid chunk size");
+        if (pointer - (uint8_t*)data > data_length - length - 12)
+            throw_error("Invalid chunk size");
         pointer += length + 12;
     }
 
@@ -48,7 +51,8 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk *chu
 
         char name_string[5];
         memcpy(name_string, pointer + 4, 4);
-        if (name_string[2] & 0b00100000) throw_error("Malformed chunk name");
+        if (name_string[2] & 0b00100000)
+            throw_error("Malformed chunk name");
         name_string[4] = '\0';
 
         memcpy(chunks[chunk].name, name_string, 5);
@@ -61,8 +65,7 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk *chu
 }
 int parse(char *path) {
     const size_t data_length = (size_t)file_length(path);
-    void *data = malloc(data_length);
-    if (data == NULL) throw_error("Failed to allocate memory");
+    void *data = safe_malloc(data_length);
     read_file(path, data_length, data);
 
     signature(data);
@@ -73,7 +76,7 @@ int parse(char *path) {
     struct chunk *chunks = safe_malloc(count * sizeof(struct chunk));
     walk_chunks(data, data_length, chunks);
 
-    
+    // TODO: go over chunks and run the appropiate functions
 
     free(chunks);
     free(data);

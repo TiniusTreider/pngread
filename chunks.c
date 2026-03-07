@@ -1,5 +1,6 @@
 #include "chunks.h"
-#include "util.h"
+#include "error.h"
+#include "io.h"
 
 #include <stdint.h>
 #include <stdio.h>

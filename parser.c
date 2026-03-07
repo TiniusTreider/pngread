@@ -25,24 +25,16 @@ struct chunk {
     uint32_t length;
     uint8_t *data;
 };
-static inline size_t count_chunks(void *data, size_t data_length) {
-    size_t chunk = 0;
-
-    uint8_t *pointer     = (uint8_t*)data + 8;
-    uint8_t *end_pointer = (uint8_t*)data + data_length;
-    while (pointer < end_pointer) {
-        const uint32_t length = read_big_endian_uint32(pointer, 0);
-
-        chunk++;
-
-        if (pointer - (uint8_t*)data > data_length - length - 12)
-            throw_error("Invalid chunk size");
-        pointer += length + 12;
-    }
-
-    return chunk;
+struct chunk_vector {
+    struct chunk *data;
+    size_t count;
 }
-static inline void walk_chunks(void *data, size_t data_length, struct chunk *chunks) {
+static inline void grow_chunk_vector(chunk_vector vector) {
+    chunk_vector.count += 4;
+    chunk_vector.data = realloc(chunk_vector.data, chunk_vector.count);
+    throw_error_if(chunk_vector.data == NULL, "Failed to allocate memory");
+}
+static inline void walk_chunks(void *data, size_t data_length, struct chunk_vector chunks) {
     size_t chunk = 0;
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
@@ -51,15 +43,18 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk *chu
 
         char name_string[5];
         memcpy(name_string, pointer + 4, 4);
-        if (name_string[2] & 0b00100000)
-            throw_error("Malformed chunk name");
+        throw_error_if(name_string[2] & 0b00100000, "Malformed chunk name");
         name_string[4] = '\0';
 
+        if (chunk >= chunks.count)
+            grow_chunk_vector(chunks);
         memcpy(chunks[chunk].name, name_string, 5);
-        chunks[chunk].length = length;
-        chunks[chunk].data   = pointer + 8;
+        chunks.data[chunk].length = length;
+        chunks.data[chunk].data   = pointer + 8;
         chunk++;
 
+        const size_t offset = pointer - (uint8_t*)data;
+        throw_error_if(offset > data_length - length - 12, "Invalid chunk size");
         pointer += length + 12;
     }
 }
@@ -71,12 +66,10 @@ int parse(char *path) {
     signature(data);
     printf(" - Size: %.2fkB\n", (float)data_length / 1000);
 
-    const size_t count = count_chunks(data, data_length);
-
-    struct chunk *chunks = safe_malloc(count * sizeof(struct chunk));
+    struct chunk *chunks = (chunk_vector){ safe_malloc(4 * sizeof(struct chunk)), 4 };
     walk_chunks(data, data_length, chunks);
 
-    // TODO: go over chunks and run the appropiate functions
+    // TODO: run functions for each chunk
 
     free(chunks);
     free(data);

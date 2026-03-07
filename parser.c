@@ -12,6 +12,7 @@
 
 
 const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+
 static inline void signature(void *data) {
     if (memcmp(NORMAL_SIGNATURE, data, 8) != 0) {
         throw_error("Invalid PNG");
@@ -58,6 +59,13 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk_vect
         pointer += length + 12;
     }
 }
+
+static inline void run_chunks(void *data, chunk_vector chunks) {
+    // TODO: sort chunks (critical, supported, unsupported)
+    //
+    // TODO: run function for each chunk if supported
+}
+
 int parse(char *path) {
     const size_t data_length = (size_t)file_length(path);
     void *data = safe_malloc(data_length);
@@ -69,10 +77,11 @@ int parse(char *path) {
     struct chunk *chunks = (chunk_vector){ safe_malloc(4 * sizeof(struct chunk)), 4 };
     walk_chunks(data, data_length, chunks);
 
-    // TODO: run functions for each chunk
+    run_chunks(data, chunks);
 
     free(chunks);
     free(data);
     printf(GREEN "\nSuccess!\n" RESET);
     return 0;
 }
+

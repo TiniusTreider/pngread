@@ -8,8 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void * data;
 
+
+void * data;
 
 const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
 static inline void signature(void) {
@@ -34,7 +35,7 @@ static inline size_t count_chunks(void *data, size_t data_length) {
         count++;
 
         const uint32_t length = read_big_endian_uint32(pointer, 0);
-        if (pointer - (uint8_t*)data + length + 12 > data_length) throw_error("Invalid chunk size");
+        if (pointer - (uint8_t*)data > data_length - length - 12) throw_error("Invalid chunk size");
         pointer += length + 12;
     }
 
@@ -72,6 +73,7 @@ int pass(char *path) {
     const size_t count = count_chunks(data, data_length);
 
     struct chunk *chunks = malloc(count * sizeof(struct chunk));
+    if (chunks = NULL) throw_error("Failed to allocate memory");
     walk_chunks(data, data_length, chunks);
 
     // WIP

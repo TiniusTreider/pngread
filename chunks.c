@@ -23,20 +23,15 @@ static inline void print_image_header(struct image_header header) {
     const char *color_type;
     switch (header.color_type) {
         case 0:
-            color_type = "Grayscale";
-            break;
+            color_type = "Grayscale"; break;
         case 2:
-            color_type = "RGB";
-            break;
+            color_type = "RGB"; break;
         case 3:
-            color_type = "Palette";
-            break;
+            color_type = "Palette"; break;
         case 4:
-            color_type = "Grayscale + Alpha";
-            break;
+            color_type = "Grayscale + Alpha"; break;
         case 6:
-            color_type = "RGB + Alpha";
-            break;
+            color_type = "RGB + Alpha"; break;
         default:
             throw_error("Invalid color type");
     }
@@ -44,11 +39,9 @@ static inline void print_image_header(struct image_header header) {
     const char *Adam7;
     switch (header.interlace_method) {
         case 0:
-            Adam7 = "false";
-            break;
+            Adam7 = "false"; break;
         case 1:
-            Adam7 = "true";
-            break;
+            Adam7 = "true"; break;
         default:
             throw_error("Invalid interlace method");
     }

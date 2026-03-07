@@ -7,6 +7,7 @@
 
 
 void throw_error(char*);
+void *safe_malloc(size_t);
 
 long file_length(char*);
 void read_file(const char*, size_t, void*);

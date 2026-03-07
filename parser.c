@@ -25,19 +25,19 @@ struct chunk {
     uint8_t *data;
 };
 static inline size_t count_chunks(void *data, size_t data_length) {
-    size_t count = 0;
+    size_t chunk = 0;
 
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
     while (pointer < end_pointer) {
-        count++;
+        chunk++;
 
         const uint32_t length = read_big_endian_uint32(pointer, 0);
         if (pointer - (uint8_t*)data > data_length - length - 12) throw_error("Invalid chunk size");
         pointer += length + 12;
     }
 
-    return count;
+    return chunk;
 }
 static inline void walk_chunks(void *data, size_t data_length, struct chunk *chunks) {
     size_t chunk = 0;
@@ -70,11 +70,10 @@ int parse(char *path) {
 
     const size_t count = count_chunks(data, data_length);
 
-    struct chunk *chunks = malloc(count * sizeof(struct chunk));
-    if (chunks == NULL) throw_error("Failed to allocate memory");
+    struct chunk *chunks = safe_malloc(count * sizeof(struct chunk));
     walk_chunks(data, data_length, chunks);
 
-    // WIP
+    
 
     free(chunks);
     free(data);

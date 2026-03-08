@@ -11,20 +11,24 @@
 
 
 
-static inline void signature(void *data) {
+static inline void top_data(void *data, size_t data_length) {
     const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+    throw_error_if(memcmp(NORMAL_SIGNATURE, data, 8) != 0, "Invalid PNG");
 
-    throw_error_if(
-        memcmp(NORMAL_SIGNATURE, data, 8) != 0,
-        "Invalid PNG"
-    );
     printf(GREEN "\nValid PNG\n\n" RESET);
+    printf(" - Size: %.2fkB\n", (float)data_length / 1000);
 }
 
 
 
+#define CHUNK_VECTOR_START_SIZE 8
+#define CHUNK_VECTOR_GROW_SIZE  4
+
 struct chunk {
     char name[5];
+    bool critical;
+    bool supported;
+
     uint32_t length;
     uint8_t *data;
 };
@@ -35,12 +39,12 @@ struct chunk_vector {
 };
 
 static inline void grow_chunk_vector(struct chunk_vector vector) {
-    vector.count += 4;
+    vector.count += CHUNK_VECTOR_GROW_SIZE;
     vector.data = realloc(vector.data, vector.count);
     throw_error_if(vector.data == NULL, "Failed to allocate memory");
 }
 
-static inline void walk_chunks(void *data, size_t data_length, struct chunk_vector chunks) {
+static inline void make_chunk_vector(void *data, size_t data_length, struct chunk_vector chunks) {
     size_t chunk = 0;
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
@@ -68,7 +72,11 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk_vect
 
 
 
-static inline void run_chunks(void *data, struct chunk_vector chunks) {
+int compare_chunk_vectors(void *a, void *b) {
+    // TODO: compare two (struct chunk)'s
+}
+
+static inline void run_chunk_functions(void *data, struct chunk_vector chunks) {
     // TODO: sort chunks (critical, supported, unsupported)
     //
     // TODO: run function for each chunk if supported
@@ -81,13 +89,14 @@ void parse(char *path) {
     void *data = safe_malloc(data_length);
     read_file(path, data_length, data);
 
-    signature(data);
-    printf(" - Size: %.2fkB\n", (float)data_length / 1000);
+    top_data(data, data_length);
 
-    struct chunk_vector chunks = (struct chunk_vector){ safe_malloc(4 * sizeof(struct chunk)), 4 };
-    walk_chunks(data, data_length, chunks);
+    struct chunk_vector chunks = (struct chunk_vector){
+        .data = safe_malloc(CHUNK_VECTOR_START_SIZE * sizeof(struct chunk)), CHUNK_VECTOR_START_SIZE
+    };
 
-    run_chunks(data, chunks);
+    make_chunk_vector(data, data_length, chunks);
+    run_chunk_functions(data, chunks);
 
     free(chunks.data);
     free(data);

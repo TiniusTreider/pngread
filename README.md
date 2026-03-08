@@ -25,7 +25,7 @@ pngread/build> ./pngread <path/to/png>
 # Example
 
 ```bash
-pngread/build> ./pngread ~/cow.png
+pngread/build> ./pngread ../cow.png
 ```
 (I/O under construction)
 

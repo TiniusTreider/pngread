@@ -37,6 +37,8 @@ void read_file(const char *path, size_t length, void *buffer) {
     if (fclose(file) == EOF) throw_error("Could not close file");
 }
 
+
+
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     uint32_t read_big_endian_uint32(void *data, size_t index) {
         const uint8_t *little_endian = (uint8_t*)data + index;

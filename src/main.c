@@ -12,14 +12,12 @@
 #define MAX_PATH_LENGTH 256
 
 int main(int argc, char *argv[]) {
-    if (argc == 1) throw_error("Path required");
+    throw_error_if(argc == 1, "Path required");
 
     const size_t length = strlen(argv[1]);
-    if (length > MAX_PATH_LENGTH)
-        throw_error("Path length exceeded 256 characters");
+    throw_error_if(length > MAX_PATH_LENGTH, "Path length exceeded 256 characters");
 
-    if (parse(argv[1]) != 0)
-        throw_error("PNG parsing failed");
+    parse(argv[1]);
 
     return 0;
 }

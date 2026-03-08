@@ -6,7 +6,11 @@ Works on all major operating systems.
 
 # Build
 
+<<<<<<< HEAD
 You need CMake 3.1 or above and GCC / Clang / MSVC etc.
+=======
+You need **CMake 3.1** or above and **GCC** / **Clang** / **MSVC**.
+>>>>>>> 590855c (better formatting and gitignored tests)
 
 ```bash
 pngread> cd build
@@ -25,7 +29,7 @@ pngread/build> ./pngread <path/to/png>
 # Example
 
 ```bash
-pngread/build> ./pngread ../tests/cow.png
+pngread/build> ./pngread ~/cow.png
 ```
 (I/O under construction)
 

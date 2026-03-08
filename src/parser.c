@@ -11,9 +11,9 @@
 
 
 
-const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
-
 static inline void signature(void *data) {
+    const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+
     if (memcmp(NORMAL_SIGNATURE, data, 8) != 0) {
         throw_error("Invalid PNG");
     } else {
@@ -21,24 +21,30 @@ static inline void signature(void *data) {
     }
 }
 
+
+
 struct chunk {
     char name[5];
     uint32_t length;
     uint8_t *data;
 };
+
 struct chunk_vector {
     struct chunk *data;
     size_t count;
 };
+
 static inline void grow_chunk_vector(struct chunk_vector vector) {
     vector.count += 4;
     vector.data = realloc(vector.data, vector.count);
     throw_error_if(vector.data == NULL, "Failed to allocate memory");
 }
+
 static inline void walk_chunks(void *data, size_t data_length, struct chunk_vector chunks) {
     size_t chunk = 0;
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
+
     while (pointer < end_pointer) {
         const uint32_t length = read_big_endian_uint32(pointer, 0);
 
@@ -60,13 +66,17 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk_vect
     }
 }
 
+
+
 static inline void run_chunks(void *data, struct chunk_vector chunks) {
     // TODO: sort chunks (critical, supported, unsupported)
     //
     // TODO: run function for each chunk if supported
 }
 
-int parse(char *path) {
+
+
+void parse(char *path) {
     const size_t data_length = (size_t)file_length(path);
     void *data = safe_malloc(data_length);
     read_file(path, data_length, data);
@@ -82,6 +92,5 @@ int parse(char *path) {
     free(chunks.data);
     free(data);
     printf(GREEN "\nSuccess!\n" RESET);
-    return 0;
 }
 

@@ -20,6 +20,7 @@ struct image_header {
     uint8_t color_type;
     uint8_t interlace_method;
 };
+
 static inline void print_image_header(struct image_header header) {
     const char *color_type;
     switch (header.color_type) {
@@ -56,6 +57,7 @@ static inline void print_image_header(struct image_header header) {
         Adam7
     );
 }
+
 void IHDR(uint8_t *data, uint32_t length) {
     struct image_header header;
     header.width  = read_big_endian_uint32(data, IHDR_WIDTH_OFFSET);
@@ -67,13 +69,19 @@ void IHDR(uint8_t *data, uint32_t length) {
     print_image_header(header);
 }
 
+
+
 void PLTE(uint8_t *data, uint32_t length) {
     //WIP
 }
 
+
+
 void IDAT(uint8_t *data, uint32_t length) {
     //WIP
 }
+
+
 
 void IEND(uint8_t *data, uint32_t length) {
     //WIP

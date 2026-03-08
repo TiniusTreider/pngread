@@ -38,13 +38,13 @@ struct chunk_vector {
     size_t count;
 };
 
-static inline void grow_chunk_vector(struct chunk_vector vector) {
-    vector.count += CHUNK_VECTOR_GROW_SIZE;
-    vector.data = realloc(vector.data, vector.count);
-    throw_error_if(vector.data == NULL, "Failed to allocate memory");
+static inline void grow_chunk_vector(struct chunk_vector *vector) {
+    vector->count += CHUNK_VECTOR_GROW_SIZE;
+    vector->data = realloc(vector->data, vector->count);
+    throw_error_if(vector->data == NULL, "Failed to allocate memory");
 }
 
-static inline void make_chunk_vector(void *data, size_t data_length, struct chunk_vector chunks) {
+static inline void make_chunk_vector(void *data, size_t data_length, struct chunk_vector *chunks) {
     size_t chunk = 0;
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
@@ -57,11 +57,11 @@ static inline void make_chunk_vector(void *data, size_t data_length, struct chun
         throw_error_if(name_string[2] & 0b00100000, "Malformed chunk name");
         name_string[4] = '\0';
 
-        if (chunk >= chunks.count)
+        if (chunk >= chunks->count)
             grow_chunk_vector(chunks);
-        memcpy(chunks.data[chunk].name, name_string, 5);
-        chunks.data[chunk].length = length;
-        chunks.data[chunk].data   = pointer + 8;
+        memcpy(chunks->data[chunk].name, name_string, 5);
+        chunks->data[chunk].length = length;
+        chunks->data[chunk].data   = pointer + 8;
         chunk++;
 
         const size_t offset = pointer - (uint8_t*)data;
@@ -76,7 +76,7 @@ int compare_chunk_vectors(void *a, void *b) {
     // TODO: compare two (struct chunk)'s
 }
 
-static inline void run_chunk_functions(void *data, struct chunk_vector chunks) {
+static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) {
     // TODO: sort chunks (critical, supported, unsupported)
     //
     // TODO: run function for each chunk if supported
@@ -95,8 +95,8 @@ void parse(char *path) {
         .data = safe_malloc(CHUNK_VECTOR_START_SIZE * sizeof(struct chunk)), CHUNK_VECTOR_START_SIZE
     };
 
-    make_chunk_vector(data, data_length, chunks);
-    run_chunk_functions(data, chunks);
+    make_chunk_vector(data, data_length, &chunks);
+    run_chunk_functions(data, &chunks);
 
     free(chunks.data);
     free(data);

@@ -19,6 +19,6 @@ struct chunk_function {
     void (*function)(uint8_t*, uint32_t);
 };
 
-extern const struct chunk_function chunk_functions[4];
+extern const struct chunk_function chunk_functions[NUM_SUPPORTED_CHUNKS];
 
 #endif

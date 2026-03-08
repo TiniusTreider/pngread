@@ -14,7 +14,7 @@ void read_file(const char *path, size_t *length_buffer, void **data_buffer_point
     throw_error_if(fseek(file, 0, SEEK_END) != 0, "Could not navigate file");
 
     const long length = ftell(file);
-    throw_error_if(length == -1L, "Could not navigate file");
+    throw_error_if(length <= 0, "Could not navigate file");
     *length_buffer = length;
 
     void *data_buffer = safe_malloc(length);

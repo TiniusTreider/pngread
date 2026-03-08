@@ -5,6 +5,8 @@
 
 
 
+#define NUM_SUPPORTED_CHUNKS 4
+
 void IHDR(uint8_t*, uint32_t);
 void PLTE(uint8_t*, uint32_t);
 void IDAT(uint8_t*, uint32_t);
@@ -17,6 +19,6 @@ struct chunk_function {
     void (*function)(uint8_t*, uint32_t);
 };
 
-extern const struct chunk_function chunk_functions[];
+extern const struct chunk_function chunk_functions[4];
 
 #endif

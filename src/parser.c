@@ -69,6 +69,7 @@ static inline void make_chunk_vector(void *data, size_t data_length, struct chun
         memcpy(chunks->data[chunk].name, name_string, 5);
         chunks->data[chunk].length = length;
         chunks->data[chunk].data   = pointer + 8;
+        // TODO: initialize chunk.critical, chunk.supported
         chunks->count++;
 
         pointer += length + 12;
@@ -98,7 +99,7 @@ static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) 
             continue;
         }
 
-        for (size_t index = 0; index < sizeof(chunk_functions) / sizeof(struct chunk_function); index++) {
+        for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++) {
             if (strcmp(this_chunk->name, chunk_functions[index].name) == 0)
                 chunk_functions[index].function(this_chunk->data, this_chunk->length);
         }

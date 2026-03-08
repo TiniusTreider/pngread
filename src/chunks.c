@@ -87,3 +87,12 @@ void IEND(uint8_t *data, uint32_t length) {
     //WIP
 }
 
+
+
+const chunk_function chunk_functions[] = {
+    (chunk_function){ "IHDR", IHDR },
+    (chunk_function){ "PLTE", PLTE },
+    (chunk_function){ "IDAT", IDAT },
+    (chunk_function){ "IEND", IEND }
+};
+

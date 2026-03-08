@@ -14,11 +14,11 @@
 static inline void signature(void *data) {
     const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
 
-    if (memcmp(NORMAL_SIGNATURE, data, 8) != 0) {
-        throw_error("Invalid PNG");
-    } else {
-        printf(GREEN "\nValid PNG\n\n" RESET);
-    }
+    throw_error_if(
+        memcmp(NORMAL_SIGNATURE, data, 8) != 0,
+        "Invalid PNG"
+    );
+    printf(GREEN "\nValid PNG\n\n" RESET);
 }
 
 

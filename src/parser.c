@@ -29,11 +29,11 @@ struct chunk {
 struct chunk_vector {
     struct chunk *data;
     size_t count;
-}
-static inline void grow_chunk_vector(chunk_vector vector) {
-    chunk_vector.count += 4;
-    chunk_vector.data = realloc(chunk_vector.data, chunk_vector.count);
-    throw_error_if(chunk_vector.data == NULL, "Failed to allocate memory");
+};
+static inline void grow_chunk_vector(struct chunk_vector vector) {
+    vector.count += 4;
+    vector.data = realloc(vector.data, vector.count);
+    throw_error_if(vector.data == NULL, "Failed to allocate memory");
 }
 static inline void walk_chunks(void *data, size_t data_length, struct chunk_vector chunks) {
     size_t chunk = 0;
@@ -49,7 +49,7 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk_vect
 
         if (chunk >= chunks.count)
             grow_chunk_vector(chunks);
-        memcpy(chunks[chunk].name, name_string, 5);
+        memcpy(chunks.data[chunk].name, name_string, 5);
         chunks.data[chunk].length = length;
         chunks.data[chunk].data   = pointer + 8;
         chunk++;
@@ -60,7 +60,7 @@ static inline void walk_chunks(void *data, size_t data_length, struct chunk_vect
     }
 }
 
-static inline void run_chunks(void *data, chunk_vector chunks) {
+static inline void run_chunks(void *data, struct chunk_vector chunks) {
     // TODO: sort chunks (critical, supported, unsupported)
     //
     // TODO: run function for each chunk if supported
@@ -74,12 +74,12 @@ int parse(char *path) {
     signature(data);
     printf(" - Size: %.2fkB\n", (float)data_length / 1000);
 
-    struct chunk *chunks = (chunk_vector){ safe_malloc(4 * sizeof(struct chunk)), 4 };
+    struct chunk_vector chunks = (struct chunk_vector){ safe_malloc(4 * sizeof(struct chunk)), 4 };
     walk_chunks(data, data_length, chunks);
 
     run_chunks(data, chunks);
 
-    free(chunks);
+    free(chunks.data);
     free(data);
     printf(GREEN "\nSuccess!\n" RESET);
     return 0;

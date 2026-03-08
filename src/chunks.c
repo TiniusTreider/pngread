@@ -35,7 +35,7 @@ static inline void print_image_header(struct image_header header) {
         case 6:
             color_type = "RGB + Alpha"; break;
         default:
-            throw_error("Invalid color type");
+            throw_error("Invalid color type (must be 0, 2, 3, 4, 6)");
     }
 
     const char *Adam7;
@@ -45,7 +45,7 @@ static inline void print_image_header(struct image_header header) {
         case 1:
             Adam7 = "true"; break;
         default:
-            throw_error("Invalid interlace method");
+            throw_error("Invalid interlace method (must be 1 or 0)");
     }
 
     printf(
@@ -59,6 +59,8 @@ static inline void print_image_header(struct image_header header) {
 }
 
 void IHDR(uint8_t *data, uint32_t length) {
+    throw_error_if(length != 13, "Invalid IHDR chunk data length (must be 13B)");
+
     struct image_header header;
     header.width  = read_big_endian_uint32(data, IHDR_WIDTH_OFFSET);
     header.height = read_big_endian_uint32(data, IHDR_HEIGHT_OFFSET);
@@ -89,10 +91,10 @@ void IEND(uint8_t *data, uint32_t length) {
 
 
 
-const chunk_function chunk_functions[] = {
-    (chunk_function){ "IHDR", IHDR },
-    (chunk_function){ "PLTE", PLTE },
-    (chunk_function){ "IDAT", IDAT },
-    (chunk_function){ "IEND", IEND }
+const struct chunk_function chunk_functions[] = {
+    (struct chunk_function){ "IHDR", IHDR },
+    (struct chunk_function){ "PLTE", PLTE },
+    (struct chunk_function){ "IDAT", IDAT },
+    (struct chunk_function){ "IEND", IEND }
 };
 

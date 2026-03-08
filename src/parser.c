@@ -1,3 +1,4 @@
+#include "chunks.h"
 #include "colors.h"
 #include "error.h"
 #include "io.h"
@@ -11,7 +12,7 @@
 
 
 
-static inline void top_data(void *data, size_t data_length) {
+static inline void print_signature(void *data, size_t data_length) {
     const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
     throw_error_if(memcmp(NORMAL_SIGNATURE, data, 8) != 0, "Invalid PNG");
 
@@ -46,12 +47,16 @@ static inline void grow_chunk_vector(struct chunk_vector *vector) {
 }
 
 static inline void make_chunk_vector(void *data, size_t data_length, struct chunk_vector *chunks) {
-    size_t chunk = 0;
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
 
-    while (pointer < end_pointer) {
+    for (int chunk = 0; pointer < end_pointer; chunk++) {
+        const size_t end_offset   = end_pointer - pointer;
+        throw_error_if(end_offset < 12, "Truncated chunk header");
+
         const uint32_t length = read_big_endian_uint32(pointer, 0);
+        const size_t start_offset = pointer - (uint8_t*)data;
+        throw_error_if(start_offset + length + 12 > data_length, "Invalid chunk size");
 
         char name_string[5];
         memcpy(name_string, pointer + 4, 4);
@@ -62,48 +67,53 @@ static inline void make_chunk_vector(void *data, size_t data_length, struct chun
             grow_chunk_vector(chunks);
 
         memcpy(chunks->data[chunk].name, name_string, 5);
-
         chunks->data[chunk].length = length;
         chunks->data[chunk].data   = pointer + 8;
-
         chunks->count++;
 
-        chunk++;
-
-        const size_t offset = pointer - (uint8_t*)data;
-        throw_error_if(offset + length + 12 > data_length, "Invalid chunk size");
         pointer += length + 12;
     }
 }
 
 
 
-int compare_chunks(void *a, void *b) {
-    struct chunk *chunk_a = (struct chunk*)a;
-    struct chunk *chunk_b = (struct chunk*)b;
+int compare_chunks(const void *a, const void *b) {
+    const struct chunk *chunk_a = (const struct chunk*)a;
+    const struct chunk *chunk_b = (const struct chunk*)b;
 
     int value_a = chunk_a->critical * 2 + chunk_a->supported;
     int value_b = chunk_b->critical * 2 + chunk_b->supported;
 
-    return value_a - value_b;
+    return value_b - value_a;
 }
 
 static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) {
     qsort(chunks->data, chunks->count, sizeof(struct chunk), compare_chunks);
 
-    for (int chunk = 0; chunk < chunks->count; chunk++) {
-        for (int function = 0; )
+    for (size_t chunk = 0; chunk < chunks->count; chunk++) {
+        struct chunk *this_chunk = chunks->data + chunk;
+
+        if (!this_chunk->supported) {
+            // TODO: print chunk header info for unsupported chunks
+            continue;
+        }
+
+        for (size_t index = 0; index < sizeof(chunk_functions) / sizeof(struct chunk_function); index++) {
+            if (strcmp(this_chunk->name, chunk_functions[index].name) == 0)
+                chunk_functions[index].function(this_chunk->data, this_chunk->length);
+        }
     }
 }
 
 
 
 void parse(char *path) {
-    const size_t data_length = (size_t)file_length(path);
-    void *data = safe_malloc(data_length);
-    read_file(path, data_length, data);
+    size_t data_length;
+    void *data;
+    read_file(path, &data_length, &data);
+    throw_error_if(data_length < 8, "Truncated file signature");
 
-    top_data(data, data_length);
+    print_signature(data, data_length);
 
     struct chunk_vector chunks = (struct chunk_vector){
         .data = safe_malloc(CHUNK_VECTOR_START_SIZE * sizeof(struct chunk)),

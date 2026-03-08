@@ -6,11 +6,7 @@ Works on all major operating systems.
 
 # Build
 
-<<<<<<< HEAD
-You need CMake 3.1 or above and GCC / Clang / MSVC etc.
-=======
-You need **CMake 3.1** or above and **GCC** / **Clang** / **MSVC**.
->>>>>>> 590855c (better formatting and gitignored tests)
+You need **CMake 3.1** or above and **GCC** / **Clang** / **MSVC** etc.
 
 ```bash
 pngread> cd build

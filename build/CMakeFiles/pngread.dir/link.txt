@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/pngread.dir/link.d CMakeFiles/pngread.dir/src/main.c.o CMakeFiles/pngread.dir/src/parser.c.o CMakeFiles/pngread.dir/src/chunks.c.o CMakeFiles/pngread.dir/src/error.c.o CMakeFiles/pngread.dir/src/io.c.o -o pngread

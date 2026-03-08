@@ -1,3 +1,0 @@
-/home/tinius/Documents/pngread/build/CMakeFiles/pngread.dir
-/home/tinius/Documents/pngread/build/CMakeFiles/edit_cache.dir
-/home/tinius/Documents/pngread/build/CMakeFiles/rebuild_cache.dir

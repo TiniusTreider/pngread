@@ -2,8 +2,24 @@
 #include "error.h"
 #include "io.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+
+
+
+static inline char *bool_to_string(bool value) {
+    return value ? "true" : "false";
+}
+
+void print_chunk_header(struct chunk *chunk) {
+    printf(
+        "\nName: %s\nCritical: %s\nSupported: %s\n",
+        chunk->name,
+        bool_to_string(chunk->critical),
+        bool_to_string(chunk->supported)
+    );
+}
 
 
 
@@ -38,23 +54,17 @@ static inline void print_image_header(struct image_header header) {
             throw_error("Invalid color type (must be 0, 2, 3, 4, 6)");
     }
 
-    const char *Adam7;
-    switch (header.interlace_method) {
-        case 0:
-            Adam7 = "false"; break;
-        case 1:
-            Adam7 = "true"; break;
-        default:
-            throw_error("Invalid interlace method (must be 1 or 0)");
-    }
-
     printf(
-        " - width: %u\n - height: %u\n - bit depth: %u\n - color: %s\n - Adam7: %s\n",
+        " - width: ....... %u\n"
+        " - height: ...... %u\n"
+        " - bit depth: ... %u\n"
+        " - color: ....... %s\n"
+        " - Adam7: ....... %s\n",
         header.width,
         header.height,
         header.bit_depth,
         color_type,
-        Adam7
+        bool_to_string(header.interlace_method)
     );
 }
 

@@ -45,7 +45,7 @@ void read_file(const char *path, size_t *length_buffer, void **data_buffer_point
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 
     uint32_t read_big_endian_uint32(void *data, size_t index) {
-        return ((uint32_t*)data)[index];
+        return *(uint32_t)((uint8_t*)data + index);
     }
 
 #else

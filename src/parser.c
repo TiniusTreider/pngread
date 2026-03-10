@@ -16,8 +16,11 @@ static inline void print_signature(void *data, size_t data_length) {
     const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
     throw_error_if(memcmp(NORMAL_SIGNATURE, data, 8) != 0, "Invalid PNG");
 
-    printf(GREEN "\nValid PNG\n\n" RESET);
-    printf(" - Size: %.2fkB\n", (float)data_length / 1000);
+    printf(
+        GREEN "\nValid PNG\n" RESET
+        " - Size: .......... %.2fkB\n",
+        (float)data_length / 1000
+    );
 }
 
 
@@ -73,7 +76,7 @@ static inline void make_chunk_vector(void *data, size_t data_length, struct chun
         memcpy(this_chunk->name, name_string, 5);
 
         this_chunk->critical = ~*name_string & CRITICAL_BIT;
-
+        this_chunk->supported = false;
         int32_t chunk_name_int = name_to_int(name_string);
         for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++) {
             if (chunk_name_int == name_to_int(chunk_functions[index].name))
@@ -107,12 +110,19 @@ static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) 
     for (size_t chunk = 0; chunk < chunks->count; chunk++) {
         struct chunk *this_chunk = chunks->data + chunk;
 
+        if (!this_chunk->critical)
+            printf(YELLOW);
+        if (!this_chunk->supported)
+            printf(RED);
+
         print_chunk_header(this_chunk);
 
         for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++) {
             if (memcmp(this_chunk->name, chunk_functions[index].name, 4) == 0)
                 chunk_functions[index].function(this_chunk->data, this_chunk->length);
         }
+
+        printf(RESET);
     }
 }
 

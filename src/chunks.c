@@ -1,4 +1,5 @@
 #include "chunks.h"
+#include "colors.h"
 #include "error.h"
 #include "io.h"
 
@@ -14,8 +15,13 @@ static inline char *bool_to_string(bool value) {
 
 void print_chunk_header(struct chunk *chunk) {
     printf(
-        "\nName: %s\nCritical: %s\nSupported: %s\n",
+        "\n"
+        "Name: ........ %s\n"
+        "Length: ...... %uB\n"
+        "Critical: .... %s\n"
+        "Supported: ... %s\n",
         chunk->name,
+        chunk->length,
         bool_to_string(chunk->critical),
         bool_to_string(chunk->supported)
     );
@@ -54,17 +60,19 @@ static inline void print_image_header(struct image_header header) {
             throw_error("Invalid color type (must be 0, 2, 3, 4, 6)");
     }
 
+    const char *interlace_method = header.interlace_method == 1 ? "Adam7" : "None";
+
     printf(
-        " - width: ....... %u\n"
-        " - height: ...... %u\n"
-        " - bit depth: ... %u\n"
-        " - color: ....... %s\n"
-        " - Adam7: ....... %s\n",
+        " - width: ......... %u\n"
+        " - height: ........ %u\n"
+        " - bit depth: ..... %u\n"
+        " - color: ......... %s\n"
+        " - Interlace: ..... %s\n",
         header.width,
         header.height,
         header.bit_depth,
         color_type,
-        bool_to_string(header.interlace_method)
+        interlace_method
     );
 }
 
@@ -84,7 +92,8 @@ void IHDR(uint8_t *data, uint32_t length) {
 
 
 void PLTE(uint8_t *data, uint32_t length) {
-    //WIP
+    throw_error_if(length < 3 || length > 768, "Invalid PLTE chunk data length (must be 3 - 768)");
+    throw_error_if(length % 3 != 0, "Invalid PLTE chunk data length (must be a multiple of three");
 }
 
 
@@ -97,6 +106,10 @@ void IDAT(uint8_t *data, uint32_t length) {
 
 void IEND(uint8_t *data, uint32_t length) {
     //WIP
+}
+
+void tEXT(uint8_t *data, uint32_t length) {
+    
 }
 
 

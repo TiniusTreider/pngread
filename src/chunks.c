@@ -9,11 +9,13 @@
 
 
 
-static inline char *bool_to_string(bool value) {
+static inline char *bool_to_string(bool value)
+{
     return value ? "true" : "false";
 }
 
-void print_chunk_header(struct chunk *chunk) {
+void print_chunk_header(struct chunk *chunk)
+{
     printf(
         "\n"
         "Name: ........ %s\n"
@@ -35,7 +37,8 @@ void print_chunk_header(struct chunk *chunk) {
 #define IHDR_COLOR_TYPE_OFFSET       9
 #define IHDR_INTERLACE_METHOD_OFFSET 12
 
-struct image_header {
+struct image_header
+{
     uint32_t width;
     uint32_t height;
     uint8_t bit_depth;
@@ -43,9 +46,11 @@ struct image_header {
     uint8_t interlace_method;
 };
 
-static inline void print_image_header(struct image_header header) {
+static inline void print_image_header(struct image_header header)
+{
     const char *color_type;
-    switch (header.color_type) {
+    switch (header.color_type)
+    {
         case 0:
             color_type = "Grayscale"; break;
         case 2:
@@ -76,7 +81,8 @@ static inline void print_image_header(struct image_header header) {
     );
 }
 
-void IHDR(uint8_t *data, uint32_t length) {
+void IHDR(uint8_t *data, uint32_t length)
+{
     throw_error_if(length != 13, "Invalid IHDR chunk data length (must be 13B)");
 
     struct image_header header;
@@ -91,25 +97,24 @@ void IHDR(uint8_t *data, uint32_t length) {
 
 
 
-void PLTE(uint8_t *data, uint32_t length) {
+void PLTE(uint8_t *data, uint32_t length)
+{
     throw_error_if(length < 3 || length > 768, "Invalid PLTE chunk data length (must be 3 - 768)");
     throw_error_if(length % 3 != 0, "Invalid PLTE chunk data length (must be a multiple of three");
 }
 
 
 
-void IDAT(uint8_t *data, uint32_t length) {
+void IDAT(uint8_t *data, uint32_t length)
+{
     //WIP
 }
 
 
 
-void IEND(uint8_t *data, uint32_t length) {
+void IEND(uint8_t *data, uint32_t length)
+{
     //WIP
-}
-
-void tEXT(uint8_t *data, uint32_t length) {
-    
 }
 
 

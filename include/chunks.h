@@ -8,7 +8,8 @@
 
 
 
-struct chunk {
+struct chunk
+{
     char name[5];
     bool critical;
     bool supported;
@@ -26,7 +27,8 @@ void PLTE(uint8_t*, uint32_t);
 void IDAT(uint8_t*, uint32_t);
 void IEND(uint8_t*, uint32_t);
 
-struct chunk_function {
+struct chunk_function
+{
     char name[5];
     void (*function)(uint8_t*, uint32_t);
 };

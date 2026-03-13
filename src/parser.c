@@ -12,7 +12,8 @@
 
 
 
-static inline void print_signature(void *data, size_t data_length) {
+static inline void print_signature(void *data, size_t data_length)
+{
     const char NORMAL_SIGNATURE[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
     throw_error_if(memcmp(NORMAL_SIGNATURE, data, 8) != 0, "Invalid PNG");
 
@@ -28,13 +29,15 @@ static inline void print_signature(void *data, size_t data_length) {
 #define CHUNK_VECTOR_START_SIZE 8
 #define CHUNK_VECTOR_GROW_SIZE  4
 
-struct chunk_vector {
+struct chunk_vector
+{
     struct chunk *data;
     size_t capacity;
     size_t count;
 };
 
-static inline void grow_chunk_vector(struct chunk_vector *vector) {
+static inline void grow_chunk_vector(struct chunk_vector *vector)
+{
     vector->capacity += CHUNK_VECTOR_GROW_SIZE;
     vector->data = realloc(vector->data, vector->capacity * sizeof(struct chunk));
     throw_error_if(vector->data == NULL, "Failed to allocate memory");
@@ -42,7 +45,8 @@ static inline void grow_chunk_vector(struct chunk_vector *vector) {
 
 #define CRITICAL_BIT 0x20
 
-static inline int32_t name_to_int(const char *name) {
+static inline int32_t name_to_int(const char *name)
+{
     return (
         (int32_t)name[0] |
         (int32_t)name[1] << 8 |
@@ -51,11 +55,13 @@ static inline int32_t name_to_int(const char *name) {
     );
 }
 
-static inline void make_chunk_vector(void *data, size_t data_length, struct chunk_vector *chunks) {
+static inline void make_chunk_vector(void *data, size_t data_length, struct chunk_vector *chunks)
+{
     uint8_t *pointer     = (uint8_t*)data + 8;
     uint8_t *end_pointer = (uint8_t*)data + data_length;
 
-    for (size_t chunk = 0; pointer < end_pointer; chunk++) {
+    for (size_t chunk = 0; pointer < end_pointer; chunk++)
+    {
         const size_t end_offset   = end_pointer - pointer;
         throw_error_if(end_offset < 12, "Truncated chunk header");
 
@@ -78,7 +84,8 @@ static inline void make_chunk_vector(void *data, size_t data_length, struct chun
         this_chunk->critical = ~*name_string & CRITICAL_BIT;
         this_chunk->supported = false;
         int32_t chunk_name_int = name_to_int(name_string);
-        for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++) {
+        for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++)
+        {
             if (chunk_name_int == name_to_int(chunk_functions[index].name))
                 this_chunk->supported = true;
         }
@@ -94,7 +101,8 @@ static inline void make_chunk_vector(void *data, size_t data_length, struct chun
 
 
 
-int compare_chunks(const void *a, const void *b) {
+int compare_chunks(const void *a, const void *b)
+{
     const struct chunk *chunk_a = (const struct chunk*)a;
     const struct chunk *chunk_b = (const struct chunk*)b;
 
@@ -104,10 +112,12 @@ int compare_chunks(const void *a, const void *b) {
     return value_b - value_a;
 }
 
-static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) {
+static inline void run_chunk_functions(void *data, struct chunk_vector *chunks)
+{
     qsort(chunks->data, chunks->count, sizeof(struct chunk), compare_chunks);
 
-    for (size_t chunk = 0; chunk < chunks->count; chunk++) {
+    for (size_t chunk = 0; chunk < chunks->count; chunk++)
+    {
         struct chunk *this_chunk = chunks->data + chunk;
 
         if (!this_chunk->critical)
@@ -117,7 +127,8 @@ static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) 
 
         print_chunk_header(this_chunk);
 
-        for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++) {
+        for (size_t index = 0; index < NUM_SUPPORTED_CHUNKS; index++)
+        {
             if (memcmp(this_chunk->name, chunk_functions[index].name, 4) == 0)
                 chunk_functions[index].function(this_chunk->data, this_chunk->length);
         }
@@ -128,7 +139,8 @@ static inline void run_chunk_functions(void *data, struct chunk_vector *chunks) 
 
 
 
-void parse(char *path) {
+void parse(char *path)
+{
     size_t data_length;
     void *data;
     read_file(path, &data_length, &data);
@@ -136,7 +148,8 @@ void parse(char *path) {
 
     print_signature(data, data_length);
 
-    struct chunk_vector chunks = (struct chunk_vector){
+    struct chunk_vector chunks = (struct chunk_vector)
+    {
         .data = safe_malloc(CHUNK_VECTOR_START_SIZE * sizeof(struct chunk)),
         .capacity = CHUNK_VECTOR_START_SIZE,
         .count = 0

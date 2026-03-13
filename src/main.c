@@ -11,7 +11,8 @@
 
 #define MAX_PATH_LENGTH 256
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     throw_error_if(argc == 1, "Path required");
 
     const size_t length = strlen(argv[1]);

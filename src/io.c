@@ -7,7 +7,8 @@
 
 
 
-void read_file(const char *path, size_t *length_buffer, void **data_buffer_pointer) {
+void read_file(const char *path, size_t *length_buffer, void **data_buffer_pointer)
+{
     FILE *file = fopen(path, "rb");
     throw_error_if(file == NULL, "Could not open file");
 
@@ -32,7 +33,8 @@ void read_file(const char *path, size_t *length_buffer, void **data_buffer_point
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
-    uint32_t read_big_endian_uint32(void *data, size_t index) {
+    uint32_t read_big_endian_uint32(void *data, size_t index)
+    {
         const uint8_t *little_endian = (uint8_t*)data + index;
         return (
             ((uint32_t)little_endian[0] << 24) |
@@ -44,7 +46,8 @@ void read_file(const char *path, size_t *length_buffer, void **data_buffer_point
 
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 
-    uint32_t read_big_endian_uint32(void *data, size_t index) {
+    uint32_t read_big_endian_uint32(void *data, size_t index)
+    {
         return *(uint32_t)((uint8_t*)data + index);
     }
 
